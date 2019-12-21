@@ -32,24 +32,26 @@ export class SubscriberChannelMixin<T> implements SubscriberChannel<T> {
 
 	public addHandler(cb: SubscriberChannel.Callback<T>): void {
 		this.verifyBrokenChannel();
+		if (this.__callbacks === undefined) { this.__callbacks = []; }
 
-		this._callbacks.push(cb);
-		if (this._callbacks.length === 1) {
+		this.__callbacks.push(cb);
+		if (this.__callbacks.length === 1) {
 			this.onAddFirstHandler();
 		}
 	}
 
 	public removeHandler(cb: SubscriberChannel.Callback<T>): void {
-		const index = this._callbacks.indexOf(cb);
+		if (this.__callbacks === undefined) { return; }
+		const index = this.__callbacks.indexOf(cb);
 		if (index !== -1) {
-			this._callbacks.splice(index, 1);
-			if (this._callbacks.length === 0) {
+			this.__callbacks.splice(index, 1);
+			if (this.__callbacks.length === 0) {
 				this.onRemoveLastHandler();
 			}
 		}
 	}
 
-	protected get isBroken(): boolean { return this._broken; }
+	protected get isBroken(): boolean { return this.__broken !== undefined && this.__broken; }
 	protected verifyBrokenChannel(): void {
 		if (this.isBroken) {
 			throw new InvalidOperationError("Wrong operation on broken channel");
@@ -57,13 +59,13 @@ export class SubscriberChannelMixin<T> implements SubscriberChannel<T> {
 	}
 
 	protected notify(event: SubscriberChannel.Event<T> | Error): void | Promise<void> {
-		if (this._callbacks.length === 0) {
+		if (this.__callbacks === undefined || this.__callbacks.length === 0) {
 			return;
 		}
-		const callbacks = this._callbacks.slice();
+		const callbacks = this.__callbacks.slice();
 		if (event instanceof Error) {
-			this._broken = true;
-			this._callbacks.splice(0, this._callbacks.length);
+			this.__broken = true;
+			this.__callbacks.splice(0, this.__callbacks.length);
 		}
 		if (callbacks.length === 1) {
 			return callbacks[0](event);
@@ -114,21 +116,9 @@ export class SubscriberChannelMixin<T> implements SubscriberChannel<T> {
 		}
 	}
 
-	protected get hasSubscribers(): boolean { return this._callbacks.length > 0; }
+	protected get hasSubscribers(): boolean { return this.__callbacks !== undefined && this.__callbacks.length > 0; }
 	protected onAddFirstHandler(): void { /* NOP */ }
 	protected onRemoveLastHandler(): void { /* NOP */ }
-
-	private get _callbacks(): Array<SubscriberChannel.Callback<T>> {
-		if (this.__callbacks === undefined) { this.__callbacks = []; }
-		return this.__callbacks;
-	}
-	private get _broken(): boolean {
-		if (this.__broken === undefined) { this.__broken = false; }
-		return this.__broken;
-	}
-	private set _broken(value: boolean) {
-		this.__broken = value;
-	}
 
 	private constructor() {
 		// Never called, due mixin
