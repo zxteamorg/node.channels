@@ -1,0 +1,48 @@
+{
+	"name": "@zxteam/channels",
+	"version": "6.0.41",
+	"description": "ZXTeam's common implementations of InvokeChannel, PublisherChannel and SubscriberChannel.",
+	"author": {
+		"name": "ZXTeam",
+		"email": "pub@project.zxteam.org",
+		"url": "http://www.zxteam.org"
+	},
+	"contributors": [
+		{
+			"name": "Maxim Anurin",
+			"email": "maxim.anurin@zxteam.org",
+			"url": "http://www.anurin.name"
+		},
+		{
+			"name": "Serhii Zghama",
+			"email": "serhii.zghama@zxteam.org"
+		}
+	],
+	"license": "MIT",
+	"dependencies": {
+		"@zxteam/contract": "^6.0.40",
+		"@zxteam/errors": "^6.0.33"
+	},
+	"devDependencies": {
+		"@types/node": "^11.15.3",
+		"@zxnode/build": "^0.0.34"
+	},
+	"engines": {
+		"node": ">=11"
+	},
+	"keywords": [],
+	"repository": {
+		"type": "git",
+		"url": "ssh://git@code.zxteam.net:22282/pub/node/channels.git"
+	},
+	"bugs": {
+		"url": "https://dev.zxteam.net/pub/node/channels/issues"
+	},
+	"homepage": "https://dev.zxteam.net/pub/node/channels",
+	"scripts": {
+		"build": "zxbuild clean dist && cp README.md .dist/",
+		"test": "nyc --exclude test --extension=\".ts\" --reporter=lcov --reporter=text --reporter=text-summary mocha \"test/**/*.test.js\" --recursive",
+		"test:only": "mocha --require source-map-support/register \"test/**/*.test.js\" --recursive"
+	},
+	"private": true
+}
