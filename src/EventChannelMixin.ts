@@ -1,8 +1,10 @@
 import { EventChannel } from "@zxteam/contract";
 import { CancelledError, AggregateError } from "@zxteam/errors";
 
-export class EventChannelMixin<T> implements EventChannel<T> {
-	private __callbacks?: Array<EventChannel.Callback<T>>;
+export class EventChannelMixin<
+	TData = Uint8Array,
+	TEvent extends EventChannel.Event<TData> = EventChannel.Event<TData>> implements EventChannel<TData, TEvent> {
+	private __callbacks?: Array<EventChannel.Callback<TData, TEvent>>;
 
 	public static applyMixin(targetClass: any): void {
 		Object.getOwnPropertyNames(EventChannelMixin.prototype).forEach(name => {
@@ -29,7 +31,7 @@ export class EventChannelMixin<T> implements EventChannel<T> {
 		});
 	}
 
-	public addHandler(cb: EventChannel.Callback<T>): void {
+	public addHandler(cb: EventChannel.Callback<TData, TEvent>): void {
 		if (this.__callbacks === undefined) { this.__callbacks = []; }
 
 		this.__callbacks.push(cb);
@@ -38,7 +40,7 @@ export class EventChannelMixin<T> implements EventChannel<T> {
 		}
 	}
 
-	public removeHandler(cb: EventChannel.Callback<T>): void {
+	public removeHandler(cb: EventChannel.Callback<TData, TEvent>): void {
 		if (this.__callbacks === undefined) { return; }
 		const index = this.__callbacks.indexOf(cb);
 		if (index !== -1) {
@@ -49,7 +51,7 @@ export class EventChannelMixin<T> implements EventChannel<T> {
 		}
 	}
 
-	protected notify(event: EventChannel.Event<T>): void | Promise<void> {
+	protected notify(event: TEvent): void | Promise<void> {
 		if (this.__callbacks === undefined || this.__callbacks.length === 0) {
 			return;
 		}

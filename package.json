@@ -1,6 +1,6 @@
 {
 	"name": "@zxteam/channels",
-	"version": "6.0.52",
+	"version": "6.0.53",
 	"description": "ZXTeam's common implementations of InvokeChannel, PublisherChannel and SubscriberChannel.",
 	"author": {
 		"name": "ZXTeam",
@@ -20,7 +20,7 @@
 	],
 	"license": "MIT",
 	"dependencies": {
-		"@zxteam/contract": "^6.0.52",
+		"@zxteam/contract": "^6.0.53",
 		"@zxteam/errors": "^6.0.41"
 	},
 	"devDependencies": {
