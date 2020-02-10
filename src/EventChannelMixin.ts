@@ -1,15 +1,12 @@
-import { SubscriberChannel } from "@zxteam/contract";
-import { CancelledError, AggregateError, InvalidOperationError } from "@zxteam/errors";
+import { EventChannel } from "@zxteam/contract";
+import { CancelledError, AggregateError } from "@zxteam/errors";
 
-export class SubscriberChannelMixin<
-	TData = Uint8Array,
-	TEvent extends SubscriberChannel.Event<TData> = SubscriberChannel.Event<TData>> implements SubscriberChannel<TData, TEvent> {
-	private __callbacks?: Array<SubscriberChannel.Callback<TData, TEvent>>;
-	private __broken?: boolean;
+export class EventChannelMixin<T> implements EventChannel<T> {
+	private __callbacks?: Array<EventChannel.Callback<T>>;
 
 	public static applyMixin(targetClass: any): void {
-		Object.getOwnPropertyNames(SubscriberChannelMixin.prototype).forEach(name => {
-			const propertyDescr = Object.getOwnPropertyDescriptor(SubscriberChannelMixin.prototype, name);
+		Object.getOwnPropertyNames(EventChannelMixin.prototype).forEach(name => {
+			const propertyDescr = Object.getOwnPropertyDescriptor(EventChannelMixin.prototype, name);
 
 			if (name === "constructor") {
 				// Skip constructor
@@ -32,8 +29,7 @@ export class SubscriberChannelMixin<
 		});
 	}
 
-	public addHandler(cb: SubscriberChannel.Callback<TData, TEvent>): void {
-		this.verifyBrokenChannel();
+	public addHandler(cb: EventChannel.Callback<T>): void {
 		if (this.__callbacks === undefined) { this.__callbacks = []; }
 
 		this.__callbacks.push(cb);
@@ -42,7 +38,7 @@ export class SubscriberChannelMixin<
 		}
 	}
 
-	public removeHandler(cb: SubscriberChannel.Callback<TData, TEvent>): void {
+	public removeHandler(cb: EventChannel.Callback<T>): void {
 		if (this.__callbacks === undefined) { return; }
 		const index = this.__callbacks.indexOf(cb);
 		if (index !== -1) {
@@ -53,22 +49,11 @@ export class SubscriberChannelMixin<
 		}
 	}
 
-	protected get isBroken(): boolean { return this.__broken !== undefined && this.__broken; }
-	protected verifyBrokenChannel(): void {
-		if (this.isBroken) {
-			throw new InvalidOperationError("Wrong operation on broken channel");
-		}
-	}
-
-	protected notify(event: TEvent | Error): void | Promise<void> {
+	protected notify(event: EventChannel.Event<T>): void | Promise<void> {
 		if (this.__callbacks === undefined || this.__callbacks.length === 0) {
 			return;
 		}
 		const callbacks = this.__callbacks.slice();
-		if (event instanceof Error) {
-			this.__broken = true;
-			this.__callbacks.splice(0, this.__callbacks.length);
-		}
 		if (callbacks.length === 1) {
 			return callbacks[0](event);
 		}
